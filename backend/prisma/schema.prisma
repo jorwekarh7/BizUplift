@@ -1,0 +1,217 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id        String   @id @default(cuid())
+  email     String   @unique
+  name      String?
+  password  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  subscriptions    Subscription[]
+  credits          Credit[]
+  googleAccounts   GoogleAccount[]
+  aiImages         AiImage[]
+
+  @@map("users")
+}
+
+model Subscription {
+  id       String   @id @default(cuid())
+  userId   String
+  plan     String   // free, pro, agency
+  status   String   @default("active")
+  startDate DateTime @default(now())
+  endDate  DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("subscriptions")
+}
+
+model Credit {
+  id       String   @id @default(cuid())
+  userId   String
+  amount   Int      @default(0)
+  type     String   // ai, etc
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("credits")
+}
+
+model GoogleAccount {
+  id           String   @id @default(cuid())
+  userId       String
+  googleId     String   @unique
+  accessToken  String
+  refreshToken String?
+  expiresAt    DateTime
+
+  user            User             @relation(fields: [userId], references: [id], onDelete: Cascade)
+  businessAccounts BusinessAccount[]
+
+  @@map("google_accounts")
+}
+
+model BusinessAccount {
+  id             String   @id @default(cuid())
+  googleAccountId String
+  accountId      String
+  name           String
+
+  googleAccount GoogleAccount @relation(fields: [googleAccountId], references: [id], onDelete: Cascade)
+  locations     Location[]
+
+  @@map("business_accounts")
+}
+
+model Location {
+  id                String   @id @default(cuid())
+  businessAccountId String
+  locationId        String
+  name              String
+  address           String?
+
+  businessAccount   BusinessAccount   @relation(fields: [businessAccountId], references: [id], onDelete: Cascade)
+  reviews           Review[]
+  auditResults      AuditResult[]
+  competitorAnalyses CompetitorAnalysis[]
+  keywords          Keyword[]
+  reports           Report[]
+  posts             Post[]
+  media             Media[]
+
+  @@map("locations")
+}
+
+model Review {
+  id           String   @id @default(cuid())
+  locationId   String
+  reviewId     String
+  reviewerName String
+  rating       Int
+  comment      String?
+  date         DateTime
+  reply        ReviewReply?
+
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@map("reviews")
+}
+
+model ReviewReply {
+  id        String   @id @default(cuid())
+  reviewId  String   @unique
+  replyText String
+  createdAt DateTime @default(now())
+
+  review Review @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+
+  @@map("review_replies")
+}
+
+model AuditResult {
+  id          String   @id @default(cuid())
+  locationId  String
+  score       Float
+  categories  Json     // { businessDescription: score, ... }
+  suggestions Json     // array of suggestions
+  createdAt   DateTime @default(now())
+
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@map("audit_results")
+}
+
+model CompetitorAnalysis {
+  id            String   @id @default(cuid())
+  locationId    String
+  competitorName String
+  rating        Float
+  reviewCount   Int
+  photosCount   Int
+  videosCount   Int
+  createdAt     DateTime @default(now())
+
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@map("competitor_analysis")
+}
+
+model Keyword {
+  id          String   @id @default(cuid())
+  locationId  String
+  keyword     String
+  impressions Int
+  clicks      Int
+  date        DateTime
+
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@map("keywords")
+}
+
+model Report {
+  id                  String   @id @default(cuid())
+  locationId          String
+  websiteClicks       Int
+  callClicks          Int
+  directionsRequests  Int
+  bookings            Int
+  impressions         Int
+  date                DateTime
+
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@map("reports")
+}
+
+model Post {
+  id         String   @id @default(cuid())
+  locationId String
+  postId     String
+  content    String
+  media      String?  // url or array
+  createdAt  DateTime @default(now())
+
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@map("posts")
+}
+
+model Media {
+  id         String   @id @default(cuid())
+  locationId String
+  mediaId    String
+  type       String   // image, video
+  url        String
+  createdAt  DateTime @default(now())
+
+  location Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
+
+  @@map("media")
+}
+
+model AiImage {
+  id        String   @id @default(cuid())
+  userId    String
+  prompt    String
+  url       String
+  category  String?
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@map("ai_images")
+}
