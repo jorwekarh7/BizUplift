@@ -1,5 +1,7 @@
 import MetricCard from '@/components/dashboard/MetricCard';
 import LocationsTable from '@/components/dashboard/LocationsTable';
+import AuditScoreWidget from '@/components/dashboard/AuditScoreWidget';
+import CompetitorSnapshot from '@/components/dashboard/CompetitorSnapshot';
 import { Building, MapPin, MessageSquare, Star } from 'lucide-react';
 
 export default function Dashboard() {
@@ -24,15 +26,12 @@ export default function Dashboard() {
         ))}
       </div>
 
-      {/* Placeholder for other sections */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         <div className="bg-slate-800/50 backdrop-blur-lg border border-slate-700/50 rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-slate-100 mb-4">Competitor Snapshot</h2>
-          <p className="text-slate-400">Competitor analysis coming soon...</p>
+          <CompetitorSnapshot />
         </div>
         <div className="bg-slate-800/50 backdrop-blur-lg border border-slate-700/50 rounded-lg p-6">
-          <h2 className="text-xl font-semibold text-slate-100 mb-4">Audit Score Widget</h2>
-          <p className="text-slate-400">Audit score coming soon...</p>
+          <AuditScoreWidget />
         </div>
       </div>
 
